@@ -1,0 +1,175 @@
+import { useState, useRef } from "react";
+
+const missions = [
+  {
+    id: 1,
+    title: "Mission 1 – Daily Tasks",
+    icon: "📖",
+    points: 12.5,
+    type: "multiple_choice",
+    instructions: "Read each sentence and choose the correct chore.",
+    questions: [
+      { q: '"Every morning, I use a broom to clean the floor."', options: ["cook", "sweep", "feed the dog", "do the dishes"], answer: "sweep" },
+      { q: '"After dinner, Maria washes all the plates and cups."', options: ["clean up", "cook", "do the dishes", "take the dog for a walk"], answer: "do the dishes" },
+      { q: '"Tom puts food in the bowl for his pet."', options: ["feed the dog", "sweep", "cook", "clean up"], answer: "feed the dog" }
+    ]
+  },
+  {
+    id: 2,
+    title: "Mission 2 – Listening: What Time Is It?",
+    icon: "🕐",
+    points: 12.5,
+    type: "multiple_choice",
+    instructions: "Listen and choose the correct time!",
+    questions: [
+      { q: '"It is half past seven."', options: ["7:00","7:15","7:30","7:45"], answer: "7:30" },
+      { q: '"It is quarter to nine."', options: ["9:00","8:45","9:15","8:30"], answer: "8:45" },
+      { q: '"It is quarter past three."', options: ["3:00","3:45","3:30","3:15"], answer: "3:15" }
+    ]
+  },
+  {
+    id: 3,
+    title: "Mission 3 – Reading",
+    icon: "📖",
+    points: 12.5,
+    type: "true_false",
+    instructions: "Read the diary entry and say TRUE or FALSE!",
+    text: `My name is Leo. I wake up at half past six and help my mom. At 4:15 I walk my dog.`,
+    questions: [
+      { q: "Leo wakes up at 6:30.", answer: true },
+      { q: "Leo never helps.", answer: false }
+    ]
+  },
+  {
+    id: 4,
+    title: "Mission 4 – Writing",
+    icon: "✏️",
+    points: 12.5,
+    type: "writing",
+    instructions: "Write about your routine!",
+    questions: [
+      { q: "What do you do every day?", placeholder: "I always..." }
+    ]
+  },
+  {
+    id: 5,
+    title: "Mission 5 – Time + Routine",
+    icon: "⏰",
+    points: 12.5,
+    type: "multiple_choice",
+    instructions: "Choose the correct sentence!",
+    questions: [
+      { q: "6:30", options: ["half past six","six past half"], answer: "half past six" }
+    ]
+  },
+  {
+    id: 6,
+    title: "Mission 6 – Adverbs",
+    icon: "📊",
+    points: 12.5,
+    type: "multiple_choice",
+    questions: [
+      { q: "I ___ study every day", options: ["never","always"], answer: "always" }
+    ]
+  },
+  {
+    id: 7,
+    title: "Mission 7 – Correction",
+    icon: "🔧",
+    points: 12.5,
+    type: "multiple_choice",
+    questions: [
+      { q: "She cook", options: ["She cooks","She cooking"], answer: "She cooks" }
+    ]
+  },
+  {
+    id: 8,
+    title: "Mission 8 – Grammar",
+    icon: "🏆",
+    points: 12.5,
+    type: "multiple_choice",
+    questions: [
+      { q: "I have ___ milk", options: ["some","any"], answer: "some" }
+    ]
+  }
+];
+
+export default function App() {
+  const [screen,setScreen]=useState("home");
+  const [missionIdx,setMissionIdx]=useState(0);
+  const [totalScore,setTotalScore]=useState(0);
+  const [coins,setCoins]=useState(0);
+  const [answers,setAnswers]=useState({});
+  const [submitted,setSubmitted]=useState(false);
+
+  const mission=missions[missionIdx];
+
+  const submit=()=>{
+    let score=0;
+    let earnedCoins=0;
+
+    mission.questions.forEach((q,i)=>{
+      if(answers[i]===q.answer){
+        score+=Math.floor(mission.points/mission.questions.length);
+        earnedCoins+=2;
+      }
+    });
+
+    earnedCoins+=5;
+    setCoins(c=>c+earnedCoins);
+    setTotalScore(s=>s+score);
+    setSubmitted(true);
+  };
+
+  const next=()=>{
+    setAnswers({});
+    setSubmitted(false);
+    if(missionIdx===missions.length-1) setScreen("end");
+    else setMissionIdx(m=>m+1);
+  };
+
+  if(screen==="home") return (
+    <div style={{textAlign:"center",padding:40,fontFamily:"Nunito"}}>
+      <h1 style={{color:"#22c55e"}}>Learn English Fun!</h1>
+      <button onClick={()=>setScreen("game")}>Start</button>
+    </div>
+  );
+
+  if(screen==="end") return (
+    <div style={{textAlign:"center"}}>
+      <h2>Score: {totalScore}/100</h2>
+      <h3>💰 Coins: {coins}</h3>
+      <button onClick={()=>location.reload()}>Restart</button>
+    </div>
+  );
+
+  return (
+    <div style={{padding:20,fontFamily:"Nunito"}}>
+      <h3>{mission.title}</h3>
+
+      <div style={{display:"flex",gap:10}}>
+        <div>⭐ {totalScore}</div>
+        <div>💰 {coins}</div>
+      </div>
+
+      {mission.questions.map((q,i)=>(
+        <div key={i}>
+          <p>{q.q}</p>
+          {q.options.map(opt=>(
+            <button key={opt} onClick={()=>setAnswers(a=>({...a,[i]:opt}))}>
+              {opt}
+            </button>
+          ))}
+        </div>
+      ))}
+
+      {!submitted ? (
+        <button onClick={submit}>Submit</button>
+      ) : (
+        <button onClick={next}>
+          {missionIdx===7?"Finish":"Next"}
+        </button>
+      )}
+    </div>
+  );
+}
